@@ -1,14 +1,20 @@
+clear
 echo ""
 echo "============================================================================================="
-echo "Testing 100 connections to http://terraform-asg-example-881506426.us-east-2.elb.amazonaws.com"
+echo "Using httperf to test 100 connections to $1"
 echo ""
-echo "test is set to TRUE"
+echo "The \"test\" parameter is set to \"true\" (\/?test=true) so we would expect our Lambda rule"
+echo "to be applied to the test.  This should result in ALL traffic going to Lambda"
+echo "" 
 echo "============================================================================================="
 echo ""
 
+rm -f /tmp/httperf-100-test_true.out
+
+SERVER=$1 
 set -x
 httperf \
-  --server terraform-asg-example-881506426.us-east-2.elb.amazonaws.com \
+  --server $SERVER \
   --port 80 \
   --rate 5 \
   --num-conn 100 \
@@ -16,7 +22,13 @@ httperf \
   --timeout 5 \
   --print-reply body \
   --uri=/?test=true \
-2>/dev/null | sed -e"s/<p>//g" | sed -e"s/<\/p>//g" | grep "You have reached" | cut -f2 -d":" | sort | uniq -c
+2>/dev/null | tee /tmp/httperf-100-test_true.out
 set +x
+
 echo ""
 echo "============================================================================================="
+echo "Run the following: "
+echo ""
+echo "cat /tmp/httperf-100-test_true.out | sed -e\"s/<p>//g\" | sed -e\"s/<\/p>//g\" | grep \"You have reached\" | cut -f2 -d\":\" | sort | uniq -c"
+echo "============================================================================================="
+echo ""

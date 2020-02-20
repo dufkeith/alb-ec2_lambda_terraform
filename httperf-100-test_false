@@ -1,24 +1,33 @@
+clear
 echo ""
 echo "============================================================================================="
-echo "Testing 100 connections to http://terraform-asg-example-881506426.us-east-2.elb.amazonaws.com"
+echo "Using httperf to test 100 connections to $1"
 echo ""
-echo "test is set to FALSE"
+echo "The \"test\" parameter is set to \"false\" (\/?test=false) so we would expect the percentage"
+echo "distribution rule to be applied to the test"
+echo "" 
 echo "============================================================================================="
 echo ""
 
-# set -x
+rm -f /tmp/httperf-100-test_false.out
+
+SERVER=$1 
+set -x
 httperf \
-  --server terraform-asg-example-881506426.us-east-2.elb.amazonaws.com \
+  --server $SERVER \
   --port 80 \
   --rate 5 \
   --num-conn 100 \
   --num-call 1 \
   --timeout 5 \
   --print-reply body \
-2>/dev/null 
-# 2>/dev/null | tee /tmp/$$.out 
-# set +x
-# echo ""
-# echo "============================================================================================="
-# cat /tmp/$$.out | sed -e"s/<p>//g" | sed -e"s/<\/p>//g" | grep "You have reached" | cut -f2 -d":" | sort | uniq -c
-# rm /tmp/$$.out
+2>/dev/null | tee /tmp/httperf-100-test_false.out
+set +x
+
+echo ""
+echo "============================================================================================="
+echo "Run the following: "
+echo ""
+echo "cat /tmp/httperf-100-test_false.out | sed -e\"s/<p>//g\" | sed -e\"s/<\/p>//g\" | grep \"You have reached\" | cut -f2 -d\":\" | sort | uniq -c"
+echo "============================================================================================="
+echo ""
